@@ -4,30 +4,25 @@ library(EMC2)
 # This script introduces the 4 basic evidence-accumulation models (EAMs)
 # supported by EMC2.
 #
-# # Most of the sampling here is relatively quick as we fit only a small data set
-# # from a single subject, although the DDM is somewhat slower. To work through
-# # without having to run the sampling for all models load pre-computed samples
-#
-# # print(load("BasicEAMs/FlankerSamples.RData"))
+# Most of the sampling here is relatively quick as we fit only a small data set
+# from a single subject, although the DDM is somewhat slower. To work through
+# without having to run the sampling for all models you can load pre-computed
+# samples
 
 # First, as in 1-BasicEAMs.R, the data needs to be re-loaded.
 print(load("data/Andrew_flanker.RData"))
 # Format the data to be suitable for analysis by the EMC2 package.
 names(dat)[1] <- "subjects"
 dat <- dat[,c("subjects","S","CI","E","R","rt")]
-
-# There were some fast responses due to double button presses removed by the
-# following line (these are all ~50ms which is the measurement resolution of
-# the toy experiment written in RStudio).
 dat <- dat[dat$rt>.2,]
 
 #### The "full" DDM ----
 
 # First let's fit the DDM by also estimating the three between-trial variability
-# parameters (they were previously set to constants).
+# parameters (previously set to zero in the WDM).
 
 # As before, we will assume a conventional model in which E selectively affects
-# thresholds and CI selectively affects rates.
+# thresholds and CI selectively affects rates, as with the WDM.
 
 designDDM <- design(model=DDM,data=dat,
   formula=list(a~E,v~0+S/CI,Z~1,t0~1,st0~1,sv~1,SZ~1)
@@ -44,22 +39,23 @@ plot(priorDDM,designDDM,layout=c(2,6))
 
 # Fitting is much slower (~20x) than for the WDM because numerical integration
 # over the st0 and SZ parameters is required to obtain the likelihood (although
-# EMC2 has its own C++ code for this likelihood
+# EMC2 has its own C++ code for this likelihood)
 
 # Hence, dropping st0 and/or SZ speeds fitting greatly. st0 is often not
 # required (and we will drop it in later lessons) and SZ only when
 # errors are faster relative to correct responses (as occurs when fast
-# responding is emphasized, as we look at this manipulation we continue to
+# responding is emphasized, as is the case here so we continue to
 # estimate this parameter throughout).
 sDDM <-  make_emc(dat,designDDM,type="single",prior=priorDDM)
 sDDM <- fit(sDDM)
-save(sDDM, file = "samples/sDDM.RData")
+# save(sDDM, file = "samples/sDDM.RData")
+load("samples/sDDM.RData")
 
 # Although slower, sampling works quite well thanks to EMC2's robust and
 # efficient sampler.
 check(sDDM)
 
-# It is also clear that the data do not strongly constraint on the v, sv and SZ
+# It is also clear that the data do not strongly constrain the sv and SZ
 # parameters.
 plot_pars(sDDM,layout=c(2,6))
 plot_pars(sDDM,layout=c(2,6),use_prior_lim=FALSE,map=TRUE)
@@ -70,8 +66,8 @@ plot_pars(sDDM,layout=c(2,6),use_prior_lim=FALSE,map=TRUE)
 # lesson as an exercise, but make a few comments on parameter values to
 # provide some orientation.
 
-# Briefly looking at DDM parameter estimates relative to the WDM we see rates are
-# larger and and thresholds greater. sv and SZ being greater than
+# Briefly looking at DDM parameter estimates relative to the WDM we see rates
+# are larger and and thresholds greater. sv and SZ being greater than
 # zero causes extra errors, so to maintain the same accuracy faster rates and
 # higher thresholds are required.
 credint(sDDM)
@@ -99,14 +95,13 @@ credint(sWDM)
 
 # Threshold parameterization ----------------------------------------------
 
-# For race models EMC2 automatically makes a "latent
-# response" (lR) factor that indexes each accumulator by its corresponding
-# response.
+# For race models EMC2 automatically makes a "latent response" (lR) factor that
+# indexes each accumulator by its corresponding response.
 levels(dat$R)
 
-# What it does under the hood, is for every available response create an accumulator
-# For every trial, these accumulators then race towards their thresholds. The
-# first to win determines the response.
+# What it does under the hood, is for every available response a accumulator is
+# created. For every trial, these accumulators then race towards their
+# thresholds. The first to win determines the response.
 
 # Note that unlike the DDM, race models can accommodate more than two responses
 # by having more than two Rlevels, although here we focus on only the binary
@@ -116,12 +111,12 @@ levels(dat$R)
 # do not have a separate response-bias parameter as does the DDM (i.e., Z).
 
 # Matching the WDM/DDM models we assume:
-# Thresholds (B) are affected by E and allow for response bias that is the
-# same for speed and accuracy by an additive combination with lR.
+
+# Thresholds (B) are affected by E and we also allow for response bias that is
+# the same for speed and accuracy by an additive combination with lR.
 designRDM <- design(data=dat,model=RDM,
                   formula=list(B~E+lR),
-                  matchfun=function(d)d$S==d$lR,
-                  contrasts=list(lM=ADmat))
+                  matchfun=function(d)d$S==d$lR)
 
 mapped_pars(designRDM)
 
@@ -145,7 +140,7 @@ mapped_pars(designRDM)
 # Drift rate parameterization ---------------------------------------------
 
 
-# A new argument to design used with race model, matchfun, is supplied with
+# A new argument to design used with race model, "matchfun", is supplied with
 # a function that indicates which accumulator (indexed by the lR factor)
 # corresponds to the a correct response for different stimuli.
 
@@ -161,28 +156,25 @@ matchfun=function(d)d$S==d$lR
 # (corresponding to incorrect responses).
 
 # Race models have one accumulator for each response, each with its own
-# parameters. For accumulation rates it is useful to recode these parameters in terms of
-# the average rate across accumulators (intercept), and d = difference
+# parameters. For accumulation rates it is useful to recode these parameters in
+# terms of the average rate across accumulators (intercept), and d = difference
 # between accumulators.
 
 # This re-coding is achieved using a contrast matrix that is supplied to the
 # contrasts argument of design, so we create it here for use in the race
 # models examined below. The values of 1/2 and -1/2 are chosen so the "d"
 # parameter magnitude corresponds to the magnitude of the difference between
-# accumulators (AD = average/difference.
+# accumulators (AD = average/difference).
 ADmat <- cbind(d = c(-1/2,1/2))
 ADmat
 
-# We can then use this contrast for the lM factor.
-# In this case, d is positive when responding is above chance and equals
-# the match - mismatch rate.
+# We can then use this contrast for the lM factor. In this case, d is positive
+# when responding is above chance and equals the match - mismatch rate.
 
 # We will call the d parameter rate "quality" as it indicates how well a
 # participant can discriminate between correct and incorrect responses. We will
 # call the intercept either "urgency" or more generically rate "quantity" as
 # it quantifies the overall level of evidence driving a response
-
-
 
 designRDM <- design(data=dat,model=RDM,
                   formula=list(v~lM),
@@ -190,18 +182,17 @@ designRDM <- design(data=dat,model=RDM,
                   contrasts=list(lM=ADmat))
 mapped_pars(designRDM)
 
-# In this case the v parameter is the average rate (over match and mismatching
+# Here, the v parameter is the average rate (over match and mismatching
 # accumulators, i.e., urgency or quantity)
-
-
 
 # Congruency --------------------------------------------------------------
 
 # Next we'll take into account how congruency affects the drift rate.
 # We assume rates vary with CI, both in terms of the difference between
-# match and mismatch (analogous to the DDM) and in terms of urgency (which
-# does not have an analogue in the standard DDM). Here we use the "*"
-# operator, which is shorthand for CI + lM + CI:lM.
+# match and mismatch (analogous to the DDM v parameter) and in terms of urgency
+# (which does not have an analogue in the standard DDM). Here we use the "*"
+# operator of the linear modeling language, which is shorthand where
+# CI*lM = CI + lM + CI:lM.
 
 # v_CIincongruent is the incongruent condition effect on urgency/quantity (i.e.,
 # the difference from the congruent condition).
@@ -256,7 +247,6 @@ plot(priorRDM,designRDM)
 # function helps you do that.
 mapped_pars(designRDM, p_vector = pmean)
 
-
 # Suppose you wished the prior to reflect findings that thresholds are lower
 # in speed than accuracy conditions by setting B_Espeed=log(.75), i.e., 25%
 # less than B in the accuracy condition.
@@ -275,8 +265,8 @@ exp(log(2) + log(.75))
 # to simply use mapped_pars to guide your choices.
 
 # To finish let's illustrate our mappings with a design plot
-plot_design(designRDM, factors = list(v = c("CI", "lM"), B = "E"), p_vector = pmean,
-            plot_factor = "E")
+plot_design(designRDM, factors = list(v = c("CI", "lM"), B = "E"),
+            p_vector = pmean,plot_factor = "E")
 
 
 ## Fitting ----
@@ -284,9 +274,8 @@ plot_design(designRDM, factors = list(v = c("CI", "lM"), B = "E"), p_vector = pm
 # Returning to fitting we see that it is fairly fast.
 sRDM <-  make_emc(dat,designRDM,type="single",prior=priorRDM)
 sRDM <- fit(sRDM)
-save(sRDM, file = "samples/sRDM.RData")
 # But you can also load it to avoid computations
-
+print(load("samples/sRDM.RData"))
 
 # The results look good.
 check(sRDM)
@@ -333,8 +322,8 @@ psd <- c(1,.25,.25,3,3,3,3,1,1,.5)
 
 priorLBA <- prior(designLBA,pmean=pmean,psd=psd,type="single")
 plot(priorLBA,designLBA,layout=c(3,4))
-plot_design(designLBA, factors = list(v = c("CI", "lM"), B = "E"), p_vector = pmean,
-            plot_factor = "E")
+plot_design(designLBA, factors = list(v = c("CI", "lM"), B = "E"),
+            p_vector = pmean, plot_factor = "E")
 
 # Note that when A is estimated the threshold is b = B+A (this is also true for
 # the RDM). This is done so that b > A (i.e., you cant start above the
@@ -344,22 +333,26 @@ plot_design(designLBA, factors = list(v = c("CI", "lM"), B = "E"), p_vector = pm
 # must look on the natural scale and ask plot(<prior>) to also do the calculation.
 # Both are achieved with the add_recalculated argument. We see the b prior
 # is a little broader than the B prior due to the addition of A.
-plot(priorLBA,designLBA,layout=c(3,6),add_recalculated = TRUE)
+plot(priorLBA,designLBA,layout=c(2,4),add_recalculated = TRUE)
 
 # Fitting is quick and works well
 sLBA <-  make_emc(dat,designLBA,type="single",prior=priorLBA)
 sLBA <- fit(sLBA)
+
+# Or you can load
+print(load("samples/sLBA.RData"))
+
+# Convergence looks good
 check(sLBA)
 plot(sLBA)
 
-
-#  We see that contraction is poor for rate parameters, particularly quality.
+#  We see that contraction is weaker for rate parameters, particularly quality.
 plot_pars(sLBA,layout=c(2,5))
 
 # Looking at the mapped results on the natural scale we see that the mismatch
 # rate is very uncertain, reflecting the lack of error responses that do most
 # to constrain it.
-plot_pars(sLBA,layout=c(2,6),use_prior_lim=FALSE,map=TRUE)
+plot_pars(sLBA,layout=c(2,3),use_prior_lim=FALSE,map=TRUE)
 
 
 # As commonly occurs when error rates are low, there are strong correlations
@@ -371,13 +364,17 @@ pairs_posterior(sLBA)
 ### LNR ----
 
 # Finally we fit the LNR model, a very simple race model that does not separately
-# identify rates and thresholds. As in the LBA, between-trial variability is
-# conventionally allowed to vary with lM but nothing needs to be fixed for
-# identifiability.
+# estimate rates and thresholds, although it can accommodate them conceptually
+# and identify them in some cases.
+
+# As in the LBA, between-trial variability is conventionally allowed to vary
+# with lM, but in contrast to the other race models nothing needs to be fixed
+# for identifiability.
 
 # Here we fit a model where the Lognormal mean (m) is an additive combination
 # of lM, CI and E main effects and interactions between lM and CI and lM and E
-# (analogous to the d effects in the RDM and LBA).
+# (analogous to the d effects in the RDM and LBA). We also add in response
+# bias (lR).
 
 # Note that larger values of m result in slower performance, so they can be
 # thought of as being directly proportional to thresholds and inversely
@@ -390,7 +387,7 @@ pairs_posterior(sLBA)
 designLNR <- design(data=dat,model=LNR,
   matchfun=function(d)d$S==d$lR,
   contrasts=list(lM=-ADmat),
-  formula=list(m~lM*(CI + E),s~lM,t0~1))
+  formula=list(m~lM*(CI + E)+lR,s~lM,t0~1))
 
 sampled_pars(designLNR)
 
@@ -415,11 +412,16 @@ sampled_pars(designLNR)
 # conditions. As accuracy is less in the speed condition this parameter is
 # expected to be negative.
 
+# m_lRright is response bias. In total we have the same number of parameters
+# as the LBA.
+
 # Priors are based on our informal experience with this model to be
 # be reasonable but fairly vague.
-pmean <- c(m=-.5,m_lMd=1,m_CIincongruent=0,m_Espeed=0,
+pmean <- c(m=-.5,m_lMd=1,m_CIincongruent=0,m_Espeed=0,m_lRright=0,
   'm_lMd:CIincongruent'=0,'m_lMd:Espeed'=0,s=log(1),s_lMd=log(1),t0=log(.2))
-psd <- c(2,2,2,2,2,2,1,1,1)
+psd <- c(2,2,2,2,2,2,2,1,1,1)
+
+
 priorLNR <- prior(designLNR,pmean=pmean,psd=psd,type="single")
 plot(priorLNR,designLNR,layout=c(3,4))
 
@@ -427,6 +429,9 @@ plot(priorLNR,designLNR,layout=c(3,4))
 # and convergence is excellent.
 sLNR <-  make_emc(dat,designLNR,type="single",rt_resolution=.05,prior=priorLNR)
 sLNR <- fit(sLNR)
+
+load("samples/sLNR.RData")
+
 check(sLNR)
 plot(sLNR)
 
@@ -434,7 +439,7 @@ plot(sLNR)
 # lack of constraint due to low error rates. t0 is estimated at a similar level
 # to the RDM.
 plot_pars(sLNR,layout=c(2,5))
-plot_pars(sLNR,layout=c(2,6),use_prior_lim=FALSE,map=TRUE)
+plot_pars(sLNR,layout=c(2,5),use_prior_lim=FALSE,map=TRUE)
 
 # Consistent with our observations about v parameters in the other race models,
 # there are high correlation among m parameters.
@@ -452,14 +457,15 @@ pairs_posterior(sLNR)
 credible(sLNR,c("m_Espeed","m_CIincongruent"))
 
 # In this case the difference is not credible. Note that it is not possible to
-# make the same test with the hypothesis function, so we cannot test equality
-# this way, but the fun method still works. This test provides positive evidence
-# for no difference.
+# make the test in the same way with the hypothesis function, but the fun method
+# still works to test equality. This test provides positive (and almost strong)
+# evidence for no difference.
+1/hypothesis(sLNR,fun=\(x) diff(x[c("m_Espeed","m_CIincongruent")]))
 
 # As another example, for quality the conflict effect is credibly larger in
 # magnitude, with strong evidence for the difference.
 credible(sLNR,c("m_lMd:Espeed","m_lMd:CIincongruent"))
-hypothesis(sLNR,fun=\(x) diff(x[c("m_lMd:Espeed","m_lMd:CIincongruent")]),selection="alpha", map = FALSE)
+hypothesis(sLNR,fun=\(x) diff(x[c("m_lMd:Espeed","m_lMd:CIincongruent")]))
 
 #### Comparing models and model fit ----
 
@@ -477,51 +483,54 @@ compare(list(WDM=sWDM,DDM=sDDM,RDM=sRDM,LNR=sLNR,LBA=sLBA))
 
 # Note that this tables also provides measures of misfit (without any complexity
 # penalty), minD and meanD. Use the smallest of the two (they are often very
-# similar as here), and smaller indicates a better fit. In this case the LNR
-# fits best. Note, however, that these are rather approximate measures so are
-# to be used as only a rough guide.
+# similar as here), and smaller indicates a better fit. In this case the LBA
+# fits best. Note, however, that this is only just one way of deciding between
+# models, other factors can also be taken into account.
 
 # The table also provides "EffectiveN", which counts parameters while taking
 # account of correlations among them to come up with something analogous to ESS
-# for samples. It identifies the DDM as being most complex, but again is rather
+# for samples. It identifies the DDM as being most complex, but is rather
 # approximate and can give negative values which are hard to interpret, as it
 # does for the LBA here.
 
 # To examine model fit we calculate post-predictives.
-ppWDM <- predict(sWDM,n_cores=4)
-ppDDM <- predict(sDDM,n_cores=4)
-ppRDM <- predict(sRDM,n_cores=4)
-ppLNR <- predict(sLNR,n_cores=4)
-ppLBA <- predict(sLBA,n_cores=4)
+ppWDM <- predict(sWDM,n_cores=9)
+ppDDM <- predict(sDDM,n_cores=9)
+ppRDM <- predict(sRDM,n_cores=9)
+ppLNR <- predict(sLNR,n_cores=9)
+ppLBA <- predict(sLBA,n_cores=9)
 
 
 correct_fun <- function(data) data$S == data$R
 
 # First for the race models
 plot_cdf(dat,ppLBA, factors = c("E", "CI"), functions = list(correct = correct_fun),
-         defective_factor = "correct")
+         defective_factor = "correct",xlim=c(.45,1.1))
 plot_cdf(dat,ppRDM, factors = c("E", "CI"), functions = list(correct = correct_fun),
-         defective_factor = "correct")
+         defective_factor = "correct",xlim=c(.45,1.1))
 plot_cdf(dat,ppLNR, factors = c("E", "CI"), functions = list(correct = correct_fun),
-         defective_factor = "correct")
+         defective_factor = "correct",xlim=c(.45,1.1))
 
-# LNR fits errors better, but LBA/RDM fit correct responses better
+# LNR fits accuracy best, then LBA and RDM last.
 
 # Now for the DDM/WDM
 plot_cdf(dat,ppWDM, factors = c("E", "CI"), functions = list(correct = correct_fun),
-         defective_factor = "correct")
+         defective_factor = "correct",xlim=c(.45,1.1))
 plot_cdf(dat,ppDDM, factors = c("E", "CI"), functions = list(correct = correct_fun),
-         defective_factor = "correct")
+         defective_factor = "correct",xlim=c(.45,1.1))
 
-# Clear misfit of the speed - incongruent condition, marginally improved by the DDM.
-# Let's compare the 'best' model of both the race category and the DDM category.
+# Clear misfit of the speed - incongruent condition, marginally improved by the
+# DDM. Let's compare the 'best' model of both the race category and the DDM
+# category according to model selection.
 
-plot_cdf(dat,list(LBA = ppLBA, DDM=ppDDM),factors = c("E", "CI"), functions = list(correct = correct_fun),
-         defective_factor = "correct", posterior_args = list(col = c("red", "blue")))
+plot_cdf(dat,list(LBA = ppLBA, DDM=ppDDM),factors = c("E", "CI"),
+  functions = list(correct = correct_fun),defective_factor = "correct",
+  posterior_args = list(col = c("red", "blue")))
 
 # Note that all the above also works with plot_density
-plot_density(dat,list(LBA = ppLBA, DDM=ppDDM),factors = c("E", "CI"), functions = list(correct = correct_fun),
-         defective_factor = "correct", posterior_args = list(col = c("red", "blue")))
+plot_density(dat,list(LBA = ppLBA, DDM=ppDDM),factors = c("E", "CI"),
+  functions = list(correct = correct_fun),defective_factor = "correct",
+  posterior_args = list(col = c("red", "blue")))
 # LBA clearly better than DDM
 
 # It is often hard to judge the fine-grained details of misfit from CDF plots.
@@ -540,17 +549,18 @@ err <- function(d)mean(d$R!=d$S)
 
 # Again the LBA clearly fits better than the DDM
 par(mfrow=c(1,3))
-plot_stat(dat, list(LBA = ppLBA, DDM=ppDDM), stat_fun = mrt, layout = NULL, main = "mean RT",
-          posterior_args = list(col = c("red", "blue")))
-plot_stat(dat, list(LBA = ppLBA, DDM=ppDDM), stat_fun = sdrt, layout = NULL, main = "sd RT",
-          posterior_args = list(col = c("red", "blue")))
-plot_stat(dat, list(LBA = ppLBA, DDM=ppDDM), stat_fun = err, layout = NULL, main = "accuracy",
-          posterior_args = list(col = c("red", "blue")))
+plot_stat(dat, list(LBA = ppLBA, DDM=ppDDM), stat_fun = mrt, layout = NULL,
+          main = "mean RT",posterior_args = list(col = c("red", "blue")))
+plot_stat(dat, list(LBA = ppLBA, DDM=ppDDM), stat_fun = sdrt, layout = NULL,
+          main = "sd RT",posterior_args = list(col = c("red", "blue")))
+plot_stat(dat, list(LBA = ppLBA, DDM=ppDDM), stat_fun = err, layout = NULL,
+          main = "accuracy", posterior_args = list(col = c("red", "blue")))
 
 # Just for illustrative purposes this could also be split by factors
 E_acc <- plot_stat(dat, list(LBA = ppLBA, DDM=ppDDM), stat_fun = err,
-          posterior_args = list(col = c("red", "blue")), factors = "E")
+          posterior_args = list(col = c("red", "blue")), factors = "S")
 
+# We can save and print out the results in tabular form
 E_acc
 
 #### Exercises ----
