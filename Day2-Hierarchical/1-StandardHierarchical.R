@@ -197,7 +197,7 @@ design_LBABvE2 <- design(data = dat,model=LBA,matchfun=matchfun,
                         formula=list(v~E*lM,sv~lM,B~E2+lR,A~1,t0~1),
                         contrasts=list(lM = ADmat, E = E_incr),
                         constants=c(sv=log(1), `v_Eacc:lMd` = 0),
-                        functions=list(E2=E2, ElM = ElMfun))
+                        functions=list(E2=E2))
 
 # This design satisfies our aim of having urgency vary by all levels of E
 # whereas the drift rate difference only varies between speed non-speed
@@ -251,7 +251,7 @@ plot_pars(LBABvE2, all_subjects = TRUE, use_par = "B_lRright")
 hypothesis(LBABvE2, parameter = "B_lRright")
 # And there's inconclusive evidence whether it should be included in the model
 # But potentially because of the large degree of individual differences
-# A model without it would be weaker. This you will test in the exercises. 
+# A model without it would be weaker. This you can test in the exercises. 
 
 
 # Hierarchical Shrinkage ----------------------------------------------------
