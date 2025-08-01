@@ -260,9 +260,16 @@ hypothesis(LBABvE2, parameter = "B_lRright")
 # because the parameter estimates are shrunk towards the group-level mean. 
 # To make this comparison we'll also fit this model non-hierarchically.
 # To that end we first set up a new prior, the ideal model would have a super
-# vague prior, but that wouldn't converge
+# vague prior, but that wouldn't converge.
 prior_LBABvE2_single <- prior(LBABvE2, update = prior_LBABvE2, type = "single",
                               psd = 2)
+
+# The reason for this vague prior, is that a direct prior on the single-subject
+# parameters is super influencial compared to an indirect prior on the group-level
+# The most appropriate comparison uses a super vague prior on the single subject, 
+# and then  an informed prior on the two-step group-level model you would run on the 
+# posterior medians.
+
 summary(prior_LBABvE2_single)
 
 LBABvE2_single <- make_emc(dat, design_LBABvE2, prior_list = prior_LBABvE2_single)
