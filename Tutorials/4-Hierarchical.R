@@ -18,21 +18,21 @@ library(EMC2)
 # Hierarchical sampling can be slow, so to work through this lesson without 
 # having to run the sampling for all models load pre-computed samples and
 # posterior predictives.
-#
-print(load("Hierarchical/fits_DDM/DDM.RData"))
-print(load("Hierarchical/fits_DDM/DDMt0.RData"))
-print(load("Hierarchical/fits_DDM/DDMv.RData"))
-print(load("Hierarchical/fits_DDM/DDMvt0.RData"))
-print(load("Hierarchical/fits_LBA/B.RData"))
-print(load("Hierarchical/fits_LBA/BBa.RData"))
-print(load("Hierarchical/fits_LBA/BBasv.RData"))
-print(load("Hierarchical/fits_LBA/Eat0.RData"))
-print(load("Hierarchical/fits_LBA/Eav.RData"))
-print(load("Hierarchical/fits_LBA/Eavt0.RData"))
-print(load("Hierarchical/fits_LBA/Eavt02.RData"))
-print(load("Hierarchical/fits_DDM/ppDDM.RData"))
-print(load("Hierarchical/fits_LBA/ppLBA.RData"))
-print(load("Hierarchical/extras.RData"))
+# #
+# print(load("Hierarchical/fits_DDM/DDM.RData"))
+# print(load("Hierarchical/fits_DDM/DDMt0.RData"))
+# print(load("Hierarchical/fits_DDM/DDMv.RData"))
+# print(load("Hierarchical/fits_DDM/DDMvt0.RData"))
+# print(load("Hierarchical/fits_LBA/B.RData"))
+# print(load("Hierarchical/fits_LBA/BBa.RData"))
+# print(load("Hierarchical/fits_LBA/BBasv.RData"))
+# print(load("Hierarchical/fits_LBA/Eat0.RData"))
+# print(load("Hierarchical/fits_LBA/Eav.RData"))
+# print(load("Hierarchical/fits_LBA/Eavt0.RData"))
+# print(load("Hierarchical/fits_LBA/Eavt02.RData"))
+# print(load("Hierarchical/fits_DDM/ppDDM.RData"))
+# print(load("Hierarchical/fits_LBA/ppLBA.RData"))
+# print(load("Hierarchical/extras.RData"))
 
 
 #### The "forstmann" data  ----
@@ -51,16 +51,18 @@ table(forstmann$subjects)
 
 # Take a look at the first subject (here increasing the default smoothing on the
 # density plot with adjust)
-plot_defective_density(forstmann,layout=c(2,3),subject=1,adjust=1.5)
-
+correct_fun <- function(data) data$R == data$S
+plot_density(forstmann,subject=1,factors = "E", functions = list(correct = correct_fun),
+             defective_factor = "correct")
+plot_cdf(forstmann,subject=1,factors = "E", functions = list(correct = correct_fun),
+             defective_factor = "correct")
 # The default is to plot results aggregated over subjects
-plot_defective_density(forstmann,layout=c(2,3))
+plot_density(forstmann,factors = "E", functions = list(correct = correct_fun),
+             defective_factor = "correct")
 
 # Not much difference between accuracy and neutral in error rate, neutral a
 # a little slower, errors the same or a little slower than correct. Speed less
-# accurate and substantially faster, with errors faster than corrects, perhaps
-# some bias to respond right (more accurate, slower).
-
+# accurate and substantially faster, with errors faster than corrects.
 #### DDM ----
 
 # We will first analyze the forstmann data with the full DDM, except st0 is 
@@ -79,7 +81,7 @@ Emat
 
 
 # For rates, we use the intercept and rate to upper boundary contrast matrix
-Vmat <- matrix(c(-1,1),ncol=1,dimnames=list(NULL,"r"))
+Vmat <- cbind(r = c(-1,1))
 Vmat
 
 ### A conventional DDM model ----
@@ -88,7 +90,7 @@ Vmat
 # accuracy (i.e., the E factor) affect only thresholds. We also allow rates 
 # (both rate bias and sensitivity) to differ for left and right stimuli. 
 design_DDM <- design(data=forstmann,model=DDM,
-  contrasts=list(S=Vmat,E=Emat),
+  contrasts=list(S=Vmat,E=-contr.),
   formula=list(v~S,a~E, Z~1, t0~1,sv~1,SZ~1)
 )
 
