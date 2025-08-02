@@ -27,13 +27,11 @@ prior_LBABvE2_nolR <- prior(design_LBABvE2_nolR, update = get_prior(LBABvE2))
 
 LBABvE2_nolR <- make_emc(dat, design = design_LBABvE2_nolR, prior_list = prior_LBABvE2_nolR)
 LBABvE2_nolR <- fit(LBABvE2_nolR, cores_per_chain = 4)
+save(LBABvE2_nolR, file = "samples/LBABvE2_nolR.RData")
 
 # Now compare the two models
 compare(list(lR = LBABvE2, nolR = LBABvE2_nolR), cores_per_prop = 4)
 
-save(LBABvE2_nolR, file = "samples/LBABvE2_nolR.RData")
-
-# Kind of unsurprisingly, the model with lR is supported!
-
-
-
+# The model with lR is supported. We generally find that it is important to 
+# always include the possibility of response bias, even when the population mean
+# is close to unbiased.
