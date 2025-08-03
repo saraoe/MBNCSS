@@ -205,8 +205,6 @@ design_LBABvE2 <- design(data = dat,model=LBA,matchfun=matchfun,
 # This design satisfies our aim of having urgency vary by all levels of E
 # whereas the drift rate difference only varies between speed non-speed
 prior_LBABvE2 <- prior(design_LBABvE2, update = prior_LBABvE)
-# # AH you had the wrong design
-# prior_LBABvE2 <- prior(design_LBABvE, update = prior_LBABvE)
 
 LBABvE2 <- make_emc(data = dat, design = design_LBABvE2, prior_list = prior_LBABvE2)
 
@@ -301,8 +299,6 @@ plot(aggregate(rt ~ subjects, dat, mean)[,2],
      aggregate(dat$S==dat$R ~ subjects, dat, mean)[,2],pch=letters)
 # subjects 11 (= k)/(15=o) have very fast/slow rts but high/low accuracy
 
-# AH you choose subject 11 on speed alone, but subject 13 is even faster
-
 # For subject 11 we see shrinkage towards lower accuracy/faster for 
 # hierarchical (blue below green), especially in the speed condition
 plot_cdf(dat, post_predict = list(single = pp_LBABvE2_single, hier = pp_LBABvE2), 
@@ -320,13 +316,12 @@ plot_cdf(dat, post_predict = list(single = pp_LBABvE2_single, hier = pp_LBABvE2)
 # We can also illustrate this effect of shrinkage, by looking at the variance
 # of the estimates graphically. 
 
-# To that end we'll use the recovery function (more on this later)
+# To that end we'll use the recovery function (more on this in a later lesson)
 # plotting the hierarchical estimates on the y axis and the single estimates on
 # the x-axis. We see that a few outlying and uncertian single estimates mean 
 # that the y-axis (hierarhcial) range is shrunk relative to the x-axis (single)
 # range.
 
-# AH great plot, I added a little more explanation. 
 recovery(LBABvE2, true_pars = LBABvE2_single, selection = "alpha", xlab = "Single",
          ylab = "Hierarchical")
 
@@ -341,24 +336,16 @@ round(apply(alpha, 2, sd),3)
 # The group-level variance estimates are much smaller
 credint(LBABvE2, selection = "sigma2", probs = .5)
 
-# Let's see which model is preferred. The DIC and BPIC are only loosely
-# informed by the group-level, the Bayes Factor (MD) is the gold
+# Let's see which model is preferred. Although the BIC and DIC do take the group-
+# level into account, the Bayes Factor (MD) is the gold
 # standard for comparing group-level models
 compare(list(single = LBABvE2_single, hier = LBABvE2), cores_for_props = 4)
 # Unsurprisingly, the group-level model is preferred by the MD and the single 
-# model by the DIC/BPIC
-# AH This is one place I get a difference with you, DIC likes hier more in my
-#    samples (by 21) vs. 72 the other way in your samples (my single EffN is 
-#    positive whereas yours is negative). Maybe phrase as their being little 
-#    difference? 
-#    In both sets of samples absolute fit (minD and Dmean) are BETTER for hier
-#    which you may get questions about. I guess worse fit for outliers is 
-#    compensated for by better fit for the others??
+# model by the DIC/BPIC although the differences are small.
+
 
 # Here the MD (Marginal Deviance; used for Bayes Factors), DIC (Deviance
 # Information Criterion) and BPIC (Bayesian Predictive Information
 # Criterion) are measures of model fit. The lower the better. The weights
 # (wX) are the probabilities of the models, the higher the better.
-
-# AH Above you say more on recovery later, but that seems to be missing.
 
