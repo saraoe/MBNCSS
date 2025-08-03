@@ -1,0 +1,78 @@
+
+R version 4.5.1 (2025-06-13) -- "Great Square Root"
+Copyright (C) 2025 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> library(EMC2)
+> load("E.RData")
+> fit(emc,fileName="E.RData",cores_per_chain=5)
+Running preburn stage
+1: Iterations preburn = 50
+Running burn stage
+1: Iterations burn = 100
+Mean Rhat = 1.143
+2: Iterations burn = 200
+Mean Rhat = 1.127
+3: Iterations burn = 300
+Mean Rhat = 1.084
+Running adapt stage
+1: Iterations adapt = 100
+Enough unique values detected: 150
+Testing proposal distribution creation
+Successfully adapted - stopping adaptation
+Running sample stage
+1: Iterations sample = 100
+Max Rhat = 1.145
+2: Iterations sample = 200
+Max Rhat = 1.063
+3: Iterations sample = 300
+Max Rhat = 1.06
+4: Iterations sample = 400
+Max Rhat = 1.051
+5: Iterations sample = 500
+Max Rhat = 1.032
+6: Iterations sample = 600
+Max Rhat = 1.048
+7: Iterations sample = 700
+Max Rhat = 1.042
+8: Iterations sample = 800
+Max Rhat = 1.028
+9: Iterations sample = 900
+Max Rhat = 1.019
+10: Iterations sample = 1000
+Max Rhat = 1.022
+Time difference of 8.826442 mins
+Iterations: 
+     preburn burn adapt sample
+[1,]       0    0     0   1000
+[2,]       0    0     0   1000
+[3,]       0    0     0   1000
+
+Subjects: 
+ [1] "as1t" "bd6t" "bl1t" "hsft" "hsgt" "kd6t" "kd9t" "kh6t" "kmat" "ku4t"
+[11] "na1t" "rmbt" "rt2t" "rt3t" "rt5t" "scat" "ta5t" "vf1t" "zk1t"
+
+Parameters: 
+ [1] "v"                "v_lMd"            "v_E2nonspeed"     "v_lMd:E2nonspeed"
+ [5] "sv_lMd"           "B"                "B_E2nonspeed"     "B_lRright"       
+ [9] "A"                "t0"              
+> 
+> proc.time()
+    user   system  elapsed 
+3289.580 4109.031  530.953 
