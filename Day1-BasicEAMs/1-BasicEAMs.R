@@ -13,8 +13,9 @@ library(EMC2)
 # This script analyzes the data collected by one of the authors (ajh) in a
 # conflict task (the Flanker task) with an added speed vs. accuracy emphasis
 # manipulation. The task is described in more detail, and instructions provided
-# on how to collect your own data in this task, in the BasicEAMs/FlankerTask.pdf
-# document.
+# on how to collect your own data in this task in R, in the BasicEAMs/FlankerTask.pdf
+# document. The experiment code also has some flexibility to define different 
+# types of conflict tasks (e.g., the Stroop or Simon task; see BasicEAMs/FlankerTask.pdf).
 
 # This script introduces methods to work with evidence-accumulation
 # models (EAMs).
