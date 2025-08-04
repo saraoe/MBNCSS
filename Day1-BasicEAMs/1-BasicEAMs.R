@@ -1,4 +1,4 @@
-rm(list=ls()) # clear R environment
+rm(list = ls()) # clear R environment
 
 
 # Getting Started ---------------------------------------------------------
@@ -14,7 +14,7 @@ library(EMC2)
 # conflict task (the Flanker task) with an added speed vs. accuracy emphasis
 # manipulation. The task is described in more detail, and instructions provided
 # on how to collect your own data in this task in R, in the BasicEAMs/FlankerTask.pdf
-# document. The experiment code also has some flexibility to define different 
+# document. The experiment code also has some flexibility to define different
 # types of conflict tasks (e.g., the Stroop or Simon task; see BasicEAMs/FlankerTask.pdf).
 
 # This script introduces methods to work with evidence-accumulation
@@ -30,8 +30,8 @@ library(EMC2)
 
 # Load and Format the Data ------------------------------------------------
 
-
-print( load("data/Andrew_flanker.RData"))
+setwd("Day1-BasicEAMs")
+print(load("data/Andrew_flanker.RData"))
 
 # Format the data to be suitable for analysis by the EMC2 package.
 names(dat)[1] <- "subjects"
@@ -39,7 +39,7 @@ names(dat)[1] <- "subjects"
 # Here we have a flanker task, meaning an inherent congruency manipulation (CI)
 # Additionally this flanker task included a speed-accuracy emphasis manipulation
 # (E)
-dat <- dat[,c("subjects","S","CI","E","R","rt")]
+dat <- dat[, c("subjects", "S", "CI", "E", "R", "rt")]
 head(dat)
 
 # Always good practice to inspect your data for irregularities.
@@ -49,7 +49,7 @@ head(dat)
 plot_density(dat, factors = c("CI", "E"))
 
 # There were some fast responses due to double button presses, lets remove
-dat <- dat[dat$rt>.2,]
+dat <- dat[dat$rt > .2, ]
 
 # Your data may also contain very slow outlying responses, check for and
 #     remove these if you are analyzing your own data.
@@ -68,7 +68,7 @@ dat <- dat[dat$rt>.2,]
 # Note that it is often nicer to plot correct and error defective densities.
 # To do so we provide a function to score accuracy. Here S is the stimulus and
 # R is the response, so if they match the response is correct.
-correct_fun <-  function(data) data$S == data$R
+correct_fun <- function(data) data$S == data$R
 plot_density(dat, factors = c("CI", "E"), functions = list(correct = correct_fun), defective_factor = "correct")
 
 # Very high accuracy, and no mistakes in the congruent factor!
@@ -121,7 +121,7 @@ DDM
 #   a (the intercept), corresponding to the threshold in the accuracy condition
 #   a_Espeed, the "speed minus accuracy" difference, expected to be negative as
 #     speed emphasis reduces thresholds.
-design_a <- design(formula = list(a ~ E), data= dat, model = DDM)
+design_a <- design(formula = list(a ~ E), data = dat, model = DDM)
 
 # This will print out 3 things:
 # - A warning saying that all parameters omitted from the formula are assumed
@@ -153,7 +153,7 @@ levels(dat$R)
 # Since we are using response coding we assume that left arrows elicit drift
 # rates that are on average towards the lower boundary (negative), and right
 # arrows instead drift rates that are towards the upper boundary (positive):
-design_av <- design(formula = list(a ~ E, v ~ 0 + S), data= dat, model = DDM)
+design_av <- design(formula = list(a ~ E, v ~ 0 + S), data = dat, model = DDM)
 
 # Here by specifying ~ 0 + S, we are telling EMC2 to use cell coding.
 # Cell coding does not use the 'intercept' and 'effect' parameterization
@@ -170,8 +170,10 @@ mapped_pars(design_av)
 # bias, meaning that 0.5 means equidistant from the lower and upper boundary.
 # 0 is the lower boundary and 1 is the upper boundary.
 
-design_WDM_simple <- design(formula = list(a ~ E, v ~ 0 + S, t0 ~ 1, Z ~ 1),
-                            data= dat, model = DDM)
+design_WDM_simple <- design(
+     formula = list(a ~ E, v ~ 0 + S, t0 ~ 1, Z ~ 1),
+     data = dat, model = DDM
+)
 
 # The "WDM" is a special case of the more generally used diffusion decision model
 # (DDM) without the latter's between-trial variability parameters (ie., they are
@@ -203,8 +205,10 @@ mapped_pars(design_WDM_simple, p_vector = p_vector)
 # compared to accuracy trials.
 
 # We can also plot the implied accumulation process of our design
-plot(design_WDM_simple, p_vector = p_vector, factors = list(v = "S", a = "E"),
-     plot_factor = "S")
+plot(design_WDM_simple,
+     p_vector = p_vector, factors = list(v = "S", a = "E"),
+     plot_factor = "S"
+)
 
 ## Including congruency ----------------------------------------------------
 
@@ -214,8 +218,10 @@ plot(design_WDM_simple, p_vector = p_vector, factors = list(v = "S", a = "E"),
 # actually quite tricky, since this means that the drift rate for left arrows
 # should be less negative, and for right arrows should be less positive. One
 # way to achieve this is to use nesting:
-design_WDM <- design(formula = list(a ~ E, v ~ 0 + S/CI, t0 ~ 1, Z ~ 1),
-                     data= dat, model = DDM)
+design_WDM <- design(
+     formula = list(a ~ E, v ~ 0 + S / CI, t0 ~ 1, Z ~ 1),
+     data = dat, model = DDM
+)
 
 # This nesting ("CI" nested within "S") estimates separate effect parameters for
 # CI for each level of S. This nesting can be illustrated with the mapped_pars
@@ -234,8 +240,10 @@ p_vector[] <- c(log(.75), -.2, -2, 2, .5, -.5, log(.25), qnorm(.5))
 mapped_pars(design_WDM, p_vector = p_vector)
 
 # Lets inspect the final model graphically.
-plot(design_WDM, p_vector = p_vector, factors = list(v = c("S", "CI"), a = "E"),
-     plot_factor = "S")
+plot(design_WDM,
+     p_vector = p_vector, factors = list(v = c("S", "CI"), a = "E"),
+     plot_factor = "S"
+)
 
 
 ######## Model Fitting
@@ -267,16 +275,18 @@ plot(design_WDM, p_vector = p_vector, factors = list(v = c("S", "CI"), a = "E"),
 # assume that the covariances are zero.
 
 # First specify the means
-pmean <- c(a=log(.17),a_Espeed=0,v_Sleft=-2.25,v_Sright=2.25,
-  'v_Sleft:CIincongruent'=0,'v_Sright:CIincongruent'=0,t0=log(.45),Z=qnorm(.5))
+pmean <- c(
+     a = log(.17), a_Espeed = 0, v_Sleft = -2.25, v_Sright = 2.25,
+     "v_Sleft:CIincongruent" = 0, "v_Sright:CIincongruent" = 0, t0 = log(.45), Z = qnorm(.5)
+)
 
 # For the standard deviations we omit the parameter names,
 # but make sure the order follows that of pmean.
-psd <- c(.7,.5,2.5,2.5,1,1,.4,.4)
+psd <- c(.7, .5, 2.5, 2.5, 1, 1, .4, .4)
 
 # We can use the "prior" function to combine this information, indicting that
 # the prior is at the single subject level.
-priorWDM <- prior(design_WDM,pmean=pmean,psd=psd,type="single")
+priorWDM <- prior(design_WDM, pmean = pmean, psd = psd, type = "single")
 
 priorWDM
 
@@ -287,11 +297,11 @@ summary(priorWDM)
 # translated to variances.
 
 # We can use the "plot_prior" function to sample from and plot the prior.
-plot(priorWDM,designWDM,map=FALSE,layout=c(2,4))
+plot(priorWDM, designWDM, map = FALSE, layout = c(2, 4))
 
 # You can also save the prior samples instead of (just) plotting them.
 # The prior samples are returned as a coda mcmc.list object
-priorSamples <- plot(priorWDM,designWDM,map=FALSE,layout=c(2,4), do_plot = FALSE)
+priorSamples <- plot(priorWDM, designWDM, map = FALSE, layout = c(2, 4), do_plot = FALSE)
 head(priorSamples[[1]])
 
 # NB: In EMC2, alpha just means that the plotted the parameter is a
@@ -299,7 +309,7 @@ head(priorSamples[[1]])
 
 # It is more informative to plot the prior on the natural scale and mapped to
 # the design cells over which they vary, which is the default (map=TRUE).
-plot(priorWDM,designWDM,layout=c(2,4))
+plot(priorWDM, designWDM, layout = c(2, 4))
 
 # NB: You will sometimes have to tinker with psd to make sure that the main part
 #     of the prior encompasses a reasonable range on the natural scale, using
@@ -314,7 +324,7 @@ plot(priorWDM,designWDM,layout=c(2,4))
 
 # By default, three independent chains are sampled, which is useful in order to
 # check whether sampling has succeeded, see below.
-sWDM <-  make_emc(dat,design_WDM,type="single",prior=priorWDM)
+sWDM <- make_emc(dat, design_WDM, type = "single", prior = priorWDM)
 
 # The likelihood speed-up factor is related to the compression factor.
 # RTs are measured with some degree of measurement error caused by hardware
@@ -387,7 +397,7 @@ check(sWDM)
 # To look at chain plots for all parameters we can simply plot the samples.
 # This provides a good example of fat,flat, hair caterpillars and good chain
 # mixing.
-plot(sWDM, layout = c(2,4))
+plot(sWDM, layout = c(2, 4))
 
 # We can see why EAMs are "sloppy" models (i.e., their parameters are often
 # highly correlated) with a "pairs" plot. Some correlations are due to the
@@ -405,7 +415,7 @@ pairs_posterior(sWDM)
 # provided by the data has "updated" the prior). Visually updating is indicated
 # by the posterior "dominating" (being much higher) and "contracting" (being
 # less variable) than the prior.
-plot_pars(sWDM,layout=c(2,4))
+plot_pars(sWDM, layout = c(2, 4))
 
 # A contraction statistic is also provided, with values near 1 indicating strong
 # updating of the prior. In this case we see that contraction was least for the
@@ -423,19 +433,19 @@ plot_pars(sWDM,layout=c(2,4))
 # We can also use map = TRUE to map the posterior samples back to the cells of
 # the experimental design and to the natural scale (the two must occur together),
 # which makes interpretation easier.
-plot_pars(sWDM,layout=c(2,4), map = TRUE)
+plot_pars(sWDM, layout = c(2, 4), map = TRUE)
 
 # In this case (with scales that make it hard to see in detail) it can
 # also be useful to look at the plot on the scale of the posterior. Setting
 # use_prior_lim = FALSE, we see that all estimates are fairly well localized.
-plot_pars(sWDM,layout=c(2,4),use_prior_lim=FALSE,map=TRUE)
+plot_pars(sWDM, layout = c(2, 4), use_prior_lim = FALSE, map = TRUE)
 
 # Interesting bimodality in non-decision time! This is one aspect of why the
 # WDM is not an adequate model of this data.
 
 # Credible intervals (by default 95%) can also be obtained to see how well the
 # estimates are localized in tabular form.
-credint(sWDM,map=TRUE)
+credint(sWDM, map = TRUE)
 
 # The generic summary function provides the same information along with
 # convergence and efficiency information.
@@ -449,7 +459,7 @@ summary(sWDM)
 # of summary).
 
 # We see a minor bias to the bottom
-credible(sWDM,"Z",map=TRUE,mu=.5)
+credible(sWDM, "Z", map = TRUE, mu = .5)
 
 # The same test can be made on the probit scale, using the default null value of
 # mu = 0. As well as providing a credible interval, the output reports a
@@ -458,7 +468,7 @@ credible(sWDM,"Z",map=TRUE,mu=.5)
 # towards the right response (i.e., positive) then we might be interested in the
 # probability of samples greater than zero. These results indicate that
 # credibility of that directional hypothesis is low.
-credible(sWDM,"Z",alternative="greater")
+credible(sWDM, "Z", alternative = "greater")
 
 # Credible intervals cannot prove the null, but that can be done using a
 # Savage-Dickey test which approximates a Bayes Factor by the ratio of the
@@ -475,7 +485,7 @@ credible(sWDM,"Z",alternative="greater")
 # variability because every time you run hypothesis(), new samples are generated
 # from the prior.
 layout(1)
-hypothesis(sWDM,"Z",selection="alpha")
+hypothesis(sWDM, "Z", selection = "alpha")
 
 # Conventionally Bayes Factors of greater than 10 (or less than 0.1) are
 # considered "strong" evidence, values between 1/3 and 3 are considered
@@ -488,13 +498,13 @@ hypothesis(sWDM,"Z",selection="alpha")
 # To do this we need to provide a function that calculates the necessary
 # difference on a parameter vector. This function is then applied to the
 # posterior samples, and the credible interval of the difference returned.
-fun <- \(x) diff(abs(x[c("v_Sleft:CIincongruent","v_Sright:CIincongruent")]))
+fun <- \(x) diff(abs(x[c("v_Sleft:CIincongruent", "v_Sright:CIincongruent")]))
 
 # Here the results are equivocal, i.e., we do not have clear evidence either
 # for no difference or for a greater effect for right.
-credible(sWDM,x_fun = fun)
+credible(sWDM, x_fun = fun)
 # Here the inverse is to make the numerical result > 1 (easier to interprit)
-1/hypothesis(sWDM,fun = fun,selection="alpha", map =FALSE)
+1 / hypothesis(sWDM, fun = fun, selection = "alpha", map = FALSE)
 
 #### Goodness of fit ----
 
@@ -520,16 +530,18 @@ ppWDM <- predict(sWDM)
 # terms of hypothetical future replications, in the Bayesian approach "the data
 # are the data" (so shown with no uncertainty) and it is the model that is
 # uncertain (i.e., its predictions have a distribution).
-plot_cdf(dat,ppWDM,layout=c(2,2), factors = c("S", "CI", "E"))
+plot_cdf(dat, ppWDM, layout = c(2, 2), factors = c("S", "CI", "E"))
 
 # For the incongruent condition there are two CDFs, one for correct and one for
 # error responses, and so data CDFs asymptote at values below 1 (i.e., the
 # probability of correct and error responses).
 
 # We can also make this plot using the correct function we defined above:
-plot_cdf(dat,ppWDM,layout=c(2,2), factors = c("E", "CI"),
-         functions = list(correct = correct_fun),
-         defective_factor = "correct")
+plot_cdf(dat, ppWDM,
+     layout = c(2, 2), factors = c("E", "CI"),
+     functions = list(correct = correct_fun),
+     defective_factor = "correct"
+)
 
 
 # Generally we see that the WDM provides a poor model of the data. Data
@@ -538,4 +550,3 @@ plot_cdf(dat,ppWDM,layout=c(2,2), factors = c("E", "CI"),
 
 # In the next lesson we will look at the more commonly used DDM and three "race"
 # EAMs provided by EMC2 to see if they do better.
-
