@@ -124,6 +124,9 @@ compare(list(null = DDM_null, alt = DDM_alt))
 # exp(-.5*(MD:M1 - MD:M2))
 exp(-.5*(755-1024))
 
+# NB: If you run this repeatedly you will get slightly different values of 
+#     MD for the two models, but the BF will always be huge.
+
 # Similarly we can also get the BayesFactor using the Savage Dickey ratio
 # with the `hypothesis` function. 
 # Infinite support! That seems good? They should evaluate the same
@@ -196,12 +199,13 @@ DDM_age <- make_emc(data = data_full, design = alt_design, prior_list = prior_ag
 
 DDM_age <- fit(DDM_age, cores_per_chain = 3, fileName = "tmp.RData")
 save(DDM_age, file = "samples/DDM_age.RData")
+load("samples/DDM_age.RData")
 
-# Unsurprisingly sv is the main culprit, but still looks super healty
+# Unsurprisingly sv is the main culprit, but still looks super healthy
 check(DDM_age)
 summary(DDM_age)
 
-# Initial assesment of our group-level parameters, here `mu`
+# Initial assessment of our group-level parameters, here `mu`
 # is the implied group-level means, `beta` is the untransformed parameters
 credint(DDM_age, selection = "beta")
 
@@ -220,6 +224,11 @@ table(data$uni)
 group_des <- group_design(list(v_Sd ~ age, `v_Sd:log_freq` ~ age, a ~age,
                                t0 ~age*uni), data = data_full, 
                           subject_design = alt_design)
+
+# AH previous fails for me, running main and dev, had to stop here.
+# Error in if (any(level_counts > 1)) { : 
+#   missing value where TRUE/FALSE needed
+
 prior_uni <- prior(alt_design, type = "standard", group_design = group_des,
                    update = prior_age)
 prior_uni
