@@ -348,7 +348,6 @@ plot_density(sdat,factors="S")
 
 profile_plot(sdat, designLBApA, p_vector = p_vector, 
              layout = c(2,5),n_cores=12)
-
 # We see that profiles and table are consistent with out implementation being
 # correct. 
 
@@ -360,7 +359,7 @@ emc <-  make_emc(sdat,designLBApA,type="single")
 save(emc,file="samples/newmodel/LBApA.RData")
 # run by fit_LBApA.R
 
-# Recovery is good.
+# Recovery is ok.
 load("samples/newmodel/LBApA.RData")
 recovery(emc,true_pars=matrix(p_vector,nrow=1))
 
@@ -373,10 +372,10 @@ save(emc,file="samples/newmodel/LBA.RData")
 # run by fit_LBA.R
 
 # Looking at the fitLBA.Rout and fitLBApA.Rout files we see that the new model 
-# is much slower because it lacks a C++ instantiation.
+# is much slower because it lacks a C++ instantiation (18x).
 
 # Altering the C would require changes in src/model_LBA.h in the following two
-# functions.
+# functions
 
 # NumericVector dlba_c(NumericVector rts, NumericMatrix pars, LogicalVector idx, double min_ll, LogicalVector is_ok){
 #   //v = 0, sv = 1, B = 2, A = 3, t0 = 4
