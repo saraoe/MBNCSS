@@ -1,0 +1,440 @@
+
+R version 4.5.1 (2025-06-13) -- "Great Square Root"
+Copyright (C) 2025 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> library(EMC2)
+> 
+> matchfun=function(data)data$S==data$lR
+> ADmat <- cbind(d = c(-1/2,1/2))
+> E2 <- function(data) factor(data$E!="speed",labels=c("speed","nonspeed"))
+> E_incr <- contr.increasing(3)
+> colnames(E_incr) <- c("nonspeed", "acc")
+> design_LBABvE2 <- design(
++   factors=list(subjects=1,E=levels(forstmann$E),S=levels(forstmann$S)),
++   Rlevels=levels(forstmann$R),model=LBA,matchfun=matchfun,
++   formula=list(v~E*lM,sv~lM,B~E2+lR,A~1,t0~1),
++   contrasts=list(lM = ADmat, E = E_incr),
++   constants=c(sv=log(1), `v_Eacc:lMd` = 0),
++   functions=list(E2=E2))
+
+ Sampled Parameters: 
+ [1] "v"               "v_Enonspeed"     "v_Eacc"          "v_lMd"          
+ [5] "v_Enonspeed:lMd" "sv_lMd"          "B"               "B_E2nonspeed"   
+ [9] "B_lRright"       "A"               "t0"             
+
+ Design Matrices: 
+$v
+        E    lM v v_Enonspeed v_Eacc v_lMd v_Enonspeed:lMd v_Eacc:lMd
+    speed  TRUE 1           0      0   0.5             0.0        0.0
+    speed FALSE 1           0      0  -0.5             0.0        0.0
+  neutral  TRUE 1           1      0   0.5             0.5        0.0
+  neutral FALSE 1           1      0  -0.5            -0.5        0.0
+ accuracy  TRUE 1           1      1   0.5             0.5        0.5
+ accuracy FALSE 1           1      1  -0.5            -0.5       -0.5
+
+$sv
+    lM sv sv_lMd
+  TRUE  1    0.5
+ FALSE  1   -0.5
+
+$B
+       E2    lR B B_E2nonspeed B_lRright
+    speed  left 1            0         0
+    speed right 1            0         1
+ nonspeed  left 1            1         0
+ nonspeed right 1            1         1
+
+$A
+ A
+ 1
+
+$t0
+ t0
+  1
+
+> 
+> E2 <- get(load("E2.RData"))
+> pars <- parameters(E2,selection="alpha")
+> pmean <- apply(pars[,-1],2,mean)
+> psd <- apply(pars[,-1],2,sd)
+> 
+> priorE2 <- prior(design_LBABvE2,mu_mean=pmean,mu_sd=psd,type="single")
+> run_sbc(design_LBABvE2, priorE2, replicates = 200, trials = 125, plot_data = FALSE,
++                   iter = 1000, n_post = 1000, fileName = "SBC_E2.RData",
++                   cores_per_chain = 25)
+[1] "Since cores_per_chain > 1, estimating multiple data sets simultaneously"
+[1] "Sample 1 out of 200"
+Processing data set 1
+Running preburn stage
+1: Iterations preburn = 50
+Running burn stage
+1: Iterations burn = 100
+Mean Rhat = 1.035
+Running adapt stage
+1: Iterations adapt = 100
+Enough unique values detected: 150
+Testing proposal distribution creation
+Successfully adapted - stopping adaptation
+Running sample stage
+1: Iterations sample = 100
+Max Rhat = 1.074
+Smallest effective size = 205
+2: Iterations sample = 200
+Max Rhat = 1.04
+Smallest effective size = 433
+3: Iterations sample = 300
+Max Rhat = 1.024
+Smallest effective size = 621
+4: Iterations sample = 400
+Max Rhat = 1.016
+Smallest effective size = 831
+5: Iterations sample = 500
+Max Rhat = 1.01
+Smallest effective size = 1132
+6: Iterations sample = 600
+Max Rhat = 1.01
+Smallest effective size = 1363
+7: Iterations sample = 700
+Max Rhat = 1.009
+Smallest effective size = 1582
+8: Iterations sample = 800
+Max Rhat = 1.009
+Smallest effective size = 1858
+9: Iterations sample = 900
+Max Rhat = 1.008
+Smallest effective size = 2274
+10: Iterations sample = 1000
+Max Rhat = 1.005
+Smallest effective size = 2403
+Time difference of 10.95591 mins
+[1] "Sample 26 out of 200"
+Processing data set 1
+Running preburn stage
+1: Iterations preburn = 50
+Running burn stage
+1: Iterations burn = 100
+Mean Rhat = 1.041
+Running adapt stage
+1: Iterations adapt = 100
+Enough unique values detected: 150
+Testing proposal distribution creation
+Successfully adapted - stopping adaptation
+Running sample stage
+1: Iterations sample = 100
+Max Rhat = 1.072
+Smallest effective size = 174
+2: Iterations sample = 200
+Max Rhat = 1.027
+Smallest effective size = 410
+3: Iterations sample = 300
+Max Rhat = 1.013
+Smallest effective size = 666
+4: Iterations sample = 400
+Max Rhat = 1.023
+Smallest effective size = 875
+5: Iterations sample = 500
+Max Rhat = 1.013
+Smallest effective size = 1026
+6: Iterations sample = 600
+Max Rhat = 1.012
+Smallest effective size = 1404
+7: Iterations sample = 700
+Max Rhat = 1.01
+Smallest effective size = 1567
+8: Iterations sample = 800
+Max Rhat = 1.007
+Smallest effective size = 1814
+9: Iterations sample = 900
+Max Rhat = 1.007
+Smallest effective size = 2106
+10: Iterations sample = 1000
+Max Rhat = 1.005
+Smallest effective size = 2452
+Time difference of 25.68514 mins
+[1] "Sample 51 out of 200"
+Processing data set 1
+Running preburn stage
+1: Iterations preburn = 50
+Running burn stage
+1: Iterations burn = 100
+Mean Rhat = 1.043
+Running adapt stage
+1: Iterations adapt = 100
+Enough unique values detected: 150
+Testing proposal distribution creation
+Successfully adapted - stopping adaptation
+Running sample stage
+1: Iterations sample = 100
+Max Rhat = 1.037
+Smallest effective size = 119
+2: Iterations sample = 200
+Max Rhat = 1.031
+Smallest effective size = 401
+3: Iterations sample = 300
+Max Rhat = 1.014
+Smallest effective size = 556
+4: Iterations sample = 400
+Max Rhat = 1.009
+Smallest effective size = 841
+5: Iterations sample = 500
+Max Rhat = 1.007
+Smallest effective size = 1160
+6: Iterations sample = 600
+Max Rhat = 1.004
+Smallest effective size = 1399
+7: Iterations sample = 700
+Max Rhat = 1.004
+Smallest effective size = 1588
+8: Iterations sample = 800
+Max Rhat = 1.004
+Smallest effective size = 1812
+9: Iterations sample = 900
+Max Rhat = 1.004
+Smallest effective size = 2063
+10: Iterations sample = 1000
+Max Rhat = 1.004
+Smallest effective size = 2433
+Time difference of 27.73562 mins
+[1] "Sample 76 out of 200"
+Processing data set 1
+Running preburn stage
+1: Iterations preburn = 50
+Running burn stage
+1: Iterations burn = 100
+Mean Rhat = 1.045
+Running adapt stage
+1: Iterations adapt = 100
+Enough unique values detected: 150
+Testing proposal distribution creation
+Successfully adapted - stopping adaptation
+Running sample stage
+1: Iterations sample = 100
+Max Rhat = 1.045
+Smallest effective size = 191
+2: Iterations sample = 200
+Max Rhat = 1.053
+Smallest effective size = 418
+3: Iterations sample = 300
+Max Rhat = 1.044
+Smallest effective size = 672
+4: Iterations sample = 400
+Max Rhat = 1.021
+Smallest effective size = 804
+5: Iterations sample = 500
+Max Rhat = 1.017
+Smallest effective size = 1123
+6: Iterations sample = 600
+Max Rhat = 1.013
+Smallest effective size = 1351
+7: Iterations sample = 700
+Max Rhat = 1.01
+Smallest effective size = 1657
+8: Iterations sample = 800
+Max Rhat = 1.007
+Smallest effective size = 1976
+9: Iterations sample = 900
+Max Rhat = 1.005
+Smallest effective size = 2102
+10: Iterations sample = 1000
+Max Rhat = 1.004
+Smallest effective size = 2319
+Time difference of 26.53512 mins
+[1] "Sample 101 out of 200"
+Processing data set 1
+Running preburn stage
+1: Iterations preburn = 50
+Running burn stage
+1: Iterations burn = 100
+Mean Rhat = 1.036
+Running adapt stage
+1: Iterations adapt = 100
+Enough unique values detected: 150
+Testing proposal distribution creation
+Successfully adapted - stopping adaptation
+Running sample stage
+1: Iterations sample = 100
+Max Rhat = 1.064
+Smallest effective size = 174
+2: Iterations sample = 200
+Max Rhat = 1.019
+Smallest effective size = 433
+3: Iterations sample = 300
+Max Rhat = 1.015
+Smallest effective size = 645
+4: Iterations sample = 400
+Max Rhat = 1.011
+Smallest effective size = 872
+5: Iterations sample = 500
+Max Rhat = 1.01
+Smallest effective size = 1196
+6: Iterations sample = 600
+Max Rhat = 1.006
+Smallest effective size = 1478
+7: Iterations sample = 700
+Max Rhat = 1.007
+Smallest effective size = 1684
+8: Iterations sample = 800
+Max Rhat = 1.006
+Smallest effective size = 1880
+9: Iterations sample = 900
+Max Rhat = 1.005
+Smallest effective size = 2084
+10: Iterations sample = 1000
+Max Rhat = 1.005
+Smallest effective size = 2393
+Time difference of 27.01059 mins
+[1] "Sample 126 out of 200"
+Processing data set 1
+Running preburn stage
+1: Iterations preburn = 50
+Running burn stage
+1: Iterations burn = 100
+Mean Rhat = 1.047
+Running adapt stage
+1: Iterations adapt = 100
+Enough unique values detected: 150
+Testing proposal distribution creation
+Successfully adapted - stopping adaptation
+Running sample stage
+1: Iterations sample = 100
+Max Rhat = 1.051
+Smallest effective size = 188
+2: Iterations sample = 200
+Max Rhat = 1.027
+Smallest effective size = 454
+3: Iterations sample = 300
+Max Rhat = 1.012
+Smallest effective size = 661
+4: Iterations sample = 400
+Max Rhat = 1.011
+Smallest effective size = 824
+5: Iterations sample = 500
+Max Rhat = 1.008
+Smallest effective size = 1190
+6: Iterations sample = 600
+Max Rhat = 1.007
+Smallest effective size = 1429
+7: Iterations sample = 700
+Max Rhat = 1.009
+Smallest effective size = 1735
+8: Iterations sample = 800
+Max Rhat = 1.005
+Smallest effective size = 1900
+9: Iterations sample = 900
+Max Rhat = 1.004
+Smallest effective size = 2241
+10: Iterations sample = 1000
+Max Rhat = 1.003
+Smallest effective size = 2566
+Time difference of 28.09319 mins
+[1] "Sample 151 out of 200"
+Processing data set 1
+Running preburn stage
+1: Iterations preburn = 50
+Running burn stage
+1: Iterations burn = 100
+Mean Rhat = 1.045
+Running adapt stage
+1: Iterations adapt = 100
+Enough unique values detected: 150
+Testing proposal distribution creation
+Successfully adapted - stopping adaptation
+Running sample stage
+1: Iterations sample = 100
+Max Rhat = 1.042
+Smallest effective size = 208
+2: Iterations sample = 200
+Max Rhat = 1.018
+Smallest effective size = 412
+3: Iterations sample = 300
+Max Rhat = 1.015
+Smallest effective size = 666
+4: Iterations sample = 400
+Max Rhat = 1.009
+Smallest effective size = 879
+5: Iterations sample = 500
+Max Rhat = 1.007
+Smallest effective size = 1118
+6: Iterations sample = 600
+Max Rhat = 1.007
+Smallest effective size = 1438
+7: Iterations sample = 700
+Max Rhat = 1.008
+Smallest effective size = 1620
+8: Iterations sample = 800
+Max Rhat = 1.006
+Smallest effective size = 1924
+9: Iterations sample = 900
+Max Rhat = 1.004
+Smallest effective size = 2033
+10: Iterations sample = 1000
+Max Rhat = 1.004
+Smallest effective size = 2424
+Time difference of 30.66373 mins
+[1] "Sample 176 out of 200"
+Processing data set 1
+Running preburn stage
+1: Iterations preburn = 50
+Running burn stage
+1: Iterations burn = 100
+Mean Rhat = 1.044
+Running adapt stage
+1: Iterations adapt = 100
+Enough unique values detected: 150
+Testing proposal distribution creation
+Successfully adapted - stopping adaptation
+Running sample stage
+1: Iterations sample = 100
+Max Rhat = 1.034
+Smallest effective size = 203
+2: Iterations sample = 200
+Max Rhat = 1.015
+Smallest effective size = 432
+3: Iterations sample = 300
+Max Rhat = 1.014
+Smallest effective size = 621
+4: Iterations sample = 400
+Max Rhat = 1.013
+Smallest effective size = 880
+5: Iterations sample = 500
+Max Rhat = 1.008
+Smallest effective size = 1136
+6: Iterations sample = 600
+Max Rhat = 1.008
+Smallest effective size = 1464
+7: Iterations sample = 700
+Max Rhat = 1.006
+Smallest effective size = 1734
+8: Iterations sample = 800
+Max Rhat = 1.005
+Smallest effective size = 2002
+9: Iterations sample = 900
+Max Rhat = 1.006
+Smallest effective size = 2052
+10: Iterations sample = 1000
+Max Rhat = 1.006
+Smallest effective size = 2245
+Time difference of 26.99022 mins
+> 
+> 
+> 
+> proc.time()
+     user    system   elapsed 
+ 99896.71 443295.49  12251.98 

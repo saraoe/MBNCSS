@@ -1,0 +1,80 @@
+
+R version 4.5.1 (2025-06-13) -- "Great Square Root"
+Copyright (C) 2025 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> library(EMC2)
+> load("E_E2.RData")
+> fit(emc,fileName="E_E2.RData",cores_per_chain=5)
+Running preburn stage
+1: Iterations preburn = 50
+Running burn stage
+1: Iterations burn = 100
+Mean Rhat = 1.27
+2: Iterations burn = 200
+Mean Rhat = 1.115
+3: Iterations burn = 233
+Mean Rhat = 1.06
+Running adapt stage
+1: Iterations adapt = 100
+Enough unique values detected: 150
+Testing proposal distribution creation
+Successfully adapted - stopping adaptation
+Running sample stage
+1: Iterations sample = 100
+Max Rhat = 1.192
+2: Iterations sample = 167
+Max Rhat = 1.068
+3: Iterations sample = 267
+Max Rhat = 1.064
+4: Iterations sample = 367
+Max Rhat = 1.039
+5: Iterations sample = 467
+Max Rhat = 1.032
+6: Iterations sample = 567
+Max Rhat = 1.027
+7: Iterations sample = 667
+Max Rhat = 1.026
+8: Iterations sample = 767
+Max Rhat = 1.016
+9: Iterations sample = 867
+Max Rhat = 1.017
+10: Iterations sample = 967
+Max Rhat = 1.017
+11: Iterations sample = 1000
+Max Rhat = 1.016
+Time difference of 8.846894 mins
+Iterations: 
+     preburn burn adapt sample
+[1,]       0    0     0   1000
+[2,]       0    0     0   1000
+[3,]       0    0     0   1000
+
+Subjects: 
+ [1] "as1t" "bd6t" "bl1t" "hsft" "hsgt" "kd6t" "kd9t" "kh6t" "kmat" "ku4t"
+[11] "na1t" "rmbt" "rt2t" "rt3t" "rt5t" "scat" "ta5t" "vf1t" "zk1t"
+
+Parameters: 
+ [1] "v"                "v_lMd"            "v_E2nonspeed"     "v_lMd:E2nonspeed"
+ [5] "sv_lMd"           "B"                "B_E2nonspeed"     "B_lRright"       
+ [9] "A"                "t0"              
+> 
+> proc.time()
+    user   system  elapsed 
+3386.437 3972.395  532.415 

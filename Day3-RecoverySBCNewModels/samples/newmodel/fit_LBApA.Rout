@@ -1,0 +1,85 @@
+
+R version 4.5.0 (2025-04-11) -- "How About a Twenty-Six"
+Copyright (C) 2025 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin20
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(EMC2)
+> load("LBApA.RData")
+> fit(emc,fileName="LBApA.RData")
+Running preburn stage
+1: Iterations preburn = 50
+Running burn stage
+1: Iterations burn = 100
+Mean Rhat = 3.391
+2: Iterations burn = 200
+Mean Rhat = 1.726
+3: Iterations burn = 233
+Mean Rhat = 1.419
+4: Iterations burn = 333
+Mean Rhat = 1.346
+5: Iterations burn = 433
+Mean Rhat = 1.356
+6: Iterations burn = 533
+Mean Rhat = 1.368
+7: Iterations burn = 633
+Mean Rhat = 1.309
+8: Iterations burn = 522
+Mean Rhat = 1.063
+Running adapt stage
+1: Iterations adapt = 100
+Enough unique values detected: 150
+Testing proposal distribution creation
+Successfully adapted - stopping adaptation
+Running sample stage
+1: Iterations sample = 100
+Max Rhat = 1.028
+2: Iterations sample = 200
+Max Rhat = 1.011
+3: Iterations sample = 300
+Max Rhat = 1.011
+4: Iterations sample = 400
+Max Rhat = 1.005
+5: Iterations sample = 500
+Max Rhat = 1.004
+6: Iterations sample = 600
+Max Rhat = 1.007
+7: Iterations sample = 700
+Max Rhat = 1.006
+8: Iterations sample = 800
+Max Rhat = 1.004
+9: Iterations sample = 900
+Max Rhat = 1.006
+10: Iterations sample = 1000
+Max Rhat = 1.007
+Time difference of 1.878735 hours
+Iterations: 
+     preburn burn adapt sample
+[1,]       0    0     0   1000
+[2,]       0    0     0   1000
+[3,]       0    0     0   1000
+
+Subjects: 
+[1] "ajh"
+
+Parameters: 
+[1] "B"                   "B_Espeed"            "B_lRright"          
+[4] "v"                   "v_lMd"               "v_CIincongruent"    
+[7] "v_lMd:CIincongruent" "A"                   "t0"                 
+> 
+> proc.time()
+     user    system   elapsed 
+19230.793    71.946  6764.126 
