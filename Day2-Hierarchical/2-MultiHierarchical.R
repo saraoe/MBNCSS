@@ -107,8 +107,9 @@ check(DDM_alt)
 summary(DDM_alt)
 
 # One interesting result here is that it seems that our model suggests
-# that the default accumulation is to say non-word
-# and that responding word takes most of the information processing
+# that the default accumulation is to say non-word. Potentially, enforcing
+# the same drift rate in both directions was a mistake and that quicker
+# drift rate for non-words is now captured by the drift bias parameter. 
 
 # Do some posterior predictives
 pp_full <- predict(DDM_alt, n_cores = 10)

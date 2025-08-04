@@ -114,7 +114,41 @@ mu_sd <- c(v=1, v_lMd=0.5, "v_lMd:E2nonspeed"=0.5,
 
 prior_LBABvE <- prior(design_LBABvE, type = 'standard',mu_mean=mu_mean,
                       mu_sd=mu_sd)
+# By default this plots the mapped prior on the group-level mean
 plot(prior_LBABvE, layout = c(2,3))
+# You can also plot the non-mapped prior on the group-level mean
+# Which is just a (multivariate) normal distribution
+plot(prior_LBABvE, layout = c(2,3), map = F)
+
+# For now we've only set priors on the group-level means. But hierarchical
+# models also require a prior on the variance (covariance matrix). The default
+# setting in EMC2 is to fit the full variance covariance matrix (type = 'standard').
+# The default settings for EMC2 lead to the following prior on the group-level variances
+# (sigma2)
+plot(prior_LBABvE, layout = c(2,3), selection = "sigma2", N = 1e4)
+
+# And the following prior on the covariances
+plot(prior_LBABvE, layout = c(2,3), selection = "covariance", N = 1e4)
+
+# But more interpretable, the correlations:
+plot(prior_LBABvE, layout = c(2,3), selection = "correlation", N = 1e4)
+
+# We can change these settings using the A and v settings:
+prior_new <- prior(design_LBABvE, update = prior_LBABvE, v = 3)
+
+# This centers the correlation more around 0
+plot(prior_new, layout = c(2,3), selection = "correlation", N = 1e4)
+
+# Or we can adjust the variances, all variances:
+prior_new <- prior(design_LBABvE, update = prior_LBABvE, A = 1)
+plot(prior_new, layout = c(2,3), selection = "sigma2", N = 1e4)
+
+# Or per parameter
+prior_new <- prior(design_LBABvE, update = prior_LBABvE, A = c(t0 = .1))
+plot(prior_new, layout = c(2,3), selection = "sigma2", N = 1e4)
+
+# But for now we'll just use the default values
+# We can also plot what our prior proposes for the individual accumulation paths. 
 
 plot_design(prior_LBABvE, factors = list(v = c("E2", "lM"), B = "E2"),
             plot_factor = "E2")
