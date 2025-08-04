@@ -76,7 +76,6 @@ load("samples/sWDM.RData")
 credint(sWDM)
 
 
-
 #### Race models ----
 
 # EMC2 provides three "race" models, the Racing Diffusion Model (RDM), the
