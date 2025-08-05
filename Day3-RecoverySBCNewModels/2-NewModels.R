@@ -468,7 +468,7 @@ EMC2:::log_likelihood_ddmgng
 # Here is the underlying DDM cdf
 EMC2:::pDDM
 
-# Which calls the WeinR package.
+# Which calls the WeinR package
 library(WeinR)
 WienR:::pWDM
         
@@ -508,12 +508,12 @@ dDDM <- design(factors=list(subjects=1:1,S=1:2),Rlevels=1:2,
 ddmd <- make_data(p,dDDM,100)
 emc1 <- make_emc(ddmd,dDDM,type="single")
 
-system.time(tmp <- init_chains(emc1)) # 8x
+system.time(tmp <- init_chains(emc1)) # ~8x
 
 # As an exercise compare fitting time.
 emc <- fit(emc) 
 # Time difference of 58.08074 secs
 
-emc <- fit(emc1)  # 8x
+emc <- fit(emc1)  # ~8x
 # Time difference of 6.796554 secs
 
