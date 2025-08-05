@@ -24,7 +24,7 @@ library(EMC2)
 # from a single subject, but to work through without having to run the sampling
 # for all models load pre-computed samples
 
-# print(load("FlankerSamples.RData"))
+# print(load("data/FlankerSamples.RData"))
 
 
 
