@@ -464,7 +464,15 @@ EMC2:::log_likelihood_ddmgng
         ok <- attr(pars, "ok") & isna
         like[ok] <- pmax(0, pmin(1, (1 - model$pfun(dadm$TIMEOUT[ok], 
             dadm$Rgo[ok], pars[ok, , drop = FALSE]))))
- 
+
+# Here is the underlying DDM cdf
+EMC2:::pDDM
+
+# Which calls the WeinR package.
+library(WeinR)
+WienR:::pWDM
+        
+# Running the model 
   
 dGNG <- design(factors=list(subjects=1:1,S=1:2),Rlevels=1:2,
     functions=list(
