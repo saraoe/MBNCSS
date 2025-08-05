@@ -153,6 +153,7 @@ hypothesis(DDM_alt, parameter = "v_Sd:log_freq")
 # Savage-Dickey ratio. 
 # Thus we only construct an alternative model for all data:
 data_full <- data[,c("subjects", "S", "R", "rt", "log_freq", "age", "uni")]
+data_full$subjects <- factor(data_full$subjects)
 
 # This is still only a subset of 30 participants of the total 
 # of 800 participants that participated in the ELP. 
