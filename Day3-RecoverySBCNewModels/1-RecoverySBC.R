@@ -1,5 +1,5 @@
 # remotes::install_github("ampl-psych/EMC2",ref="SScpp1")
-# remotes::install_github("ampl-psych/EMC2",ref="main")
+# remotes::install_github("ampl-psych/EMC2",ref="dev")
 library(EMC2)
 
 #### Setup ----
@@ -45,23 +45,27 @@ dat <- make_data(mu,design_LBABvE2_1,n_trials=5000)
 # over true values.
 profile_plot(dat,design_LBABvE2_1,mu,layout=c(2,6))
 
-# Now lets try fitting to the simulated data
-emc <- make_emc(dat,design_LBABvE2_1,type="single")
-emc <- fit(emc,fileName="samples/E21.RData")
+# # Now lets try fitting to the simulated data
+# emc <- make_emc(dat,design_LBABvE2_1,type="single")
+# E21 <- fit(emc,fileName="samples/E21.RData")
+
+E21 <- get(load("samples/E21.RData"))
 
 # As expected recovery looks excellent
-recovery(emc,true_pars=mu)
+recovery(E21,true_pars=mu)
 
 # With a more realistic design still pretty good profiles 
 dat1 <- make_data(mu,design_LBABvE2_1,n_trials=125)
 profile_plot(dat1,design_LBABvE2_1,mu,layout=c(2,6))
 
-# Small sample recovery
-emc1 <- make_emc(dat1,design_LBABvE2_1,type="single")
-emc1 <- fit(emc1)
+# # Small sample recovery
+# emc <- make_emc(dat1,design_LBABvE2_1,type="single")
+# E211 <- fit(emc,fileName="samples/E211.RData")
+
+E211 <- get(load("samples/E211.RData"))
 
 # Ok, but with wider credible intervals
-recovery(emc1,mu)
+recovery(E211,mu)
 
 ### Checking many single-participant recoveries ----
 
@@ -85,18 +89,18 @@ cov <- lapply(credint(LBABvE2,selection="covariance"),\(x)x[,2])
 for (i in names(var)) vcov[i,colnames(vcov)!=i] <- cov[[i]] 
 
 
-# Sample 200 subjects and make data
-E2par <- make_random_effects(design_LBABvE2,group_means=mu,covariances = vcov)
-
-# Now use the sampled parameters to make data
-datE2 <- make_data(E2par,design_LBABvE2,n_trials=125)
+# # Sample 200 subjects and make data
+# E2par <- make_random_effects(design_LBABvE2,group_means=mu,covariances = vcov)
+# 
+# # Now use the sampled parameters to make data
+# datE2 <- make_data(E2par,design_LBABvE2,n_trials=125)
 
 # # Run by fit_E2E2.R
 # emc <- make_emc(datdesign_LBABvE2_1,type="single")
 # save(emc,file="E2E2.RData")
 
 # Load fits
-E2E2 <- get(load("E2E2.RData"))
+E2E2 <- get(load("samples/E2E2.RData"))
 
 # Generally good, some wild estimates but also with large credible intervals.
 recovery(E2E2,E2par,layout=c(2,6))
@@ -119,13 +123,16 @@ for (i in names(CIs)) {
 
 ### A more general and fine-grained approach: simulation-based calibration (SBC) ----
 
+## https://cran.r-project.org/web//packages/EMC2/vignettes/Simulation-based-Calibration.html
+
+
 # Check if a model is sampling properly in the space defined by a prior
 
 # We use the posterior samples from the fits to data to get a prior.
-E2 <- get(load("E2.RData"))
+E2E2 <- get(load("samples/E2E2.RData"))
 
 # Get broadly representative prior from all subject-level parameter
-pars <- parameters(E2,selection="alpha")
+pars <- parameters(E2E2,selection="alpha")
 
 # Get their mean and SD
 pmean <- apply(pars[,-1],2,mean)
@@ -228,7 +235,7 @@ E2E <- get(load("samples/hier/E2_E.RData"))
 E <- get(load("samples/hier/E.RData"))
 EE2 <- get(load("samples/hier/E_E2.RData"))
 
-# The more complex model is strongly selected over the simpler one
+# The more complex model is strongly selected over the simpler one (slowish)
 compare(list(E2E2=E2,E2E=E2E),cores_for_props = 4)
 #          MD wMD    DIC wDIC   BPIC wBPIC EffectiveN  meanD  Dmean   minD
 # E2E2 -16620   1 -17166    1 -16932     1        233 -17399 -17578 -17632
@@ -242,7 +249,7 @@ compare_subject(list(E2E2=E2,E2E=E2E))
 sort(credint(LBABvE2,selection="alpha")$v_Eacc[,2])
 
 # However, the simpler model is not perfered to the more complex one when it
-# is true. 
+# is true (slow). 
 compare(list(EE=E,EE2=EE2),cores_for_props = 4)
 #         MD  wMD    DIC  wDIC   BPIC wBPIC EffectiveN  meanD  Dmean   minD
 # EE  -16475 0.29 -16943 0.213 -16721 0.213        222 -17165 -17321 -17387
