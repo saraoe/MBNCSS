@@ -417,7 +417,103 @@ save(emc,file="samples/newmodel/LBA.RData")
 #   return(out);
 # }
 
+#### GNG DDM (if time) ---
+
+# Gomez, P., Ratcliff, R., & Perea, M. (2007). A Model of the Go/No-Go Task. 
+# Journal of Experimental Psychology: General, 136(3), 389–413. 
+# https://doi.org/10.1037/0096-3445.136.3.389
+
+DDMGNG()
 
 
+# With TIMEOUT and the response that is nogo passed through to the likelihood
 
+   # Ttransform = function(pars,dadm) {
+   #    pars[,"SZ"] <- 2*pars[,"SZ"]*apply(cbind(pars[,"Z"],1-pars[,"Z"]),1,min)
+   #    pars <- cbind(pars,z=pars[,"Z"]*pars[,"a"], sz = pars[,"SZ"]*pars[,"a"],
+   #                  TIMEOUT=dadm$TIMEOUT,Rnogo=as.numeric(dadm$Rnogo))
+   #    pars
+   #  }
+
+# The standard random function sets rt to NA after timeout and R for "nogo"
+# to NA
+    # Random function
+    rfun=function(data,pars) {
+      out <- rDDM(data$R,pars, attr(pars, "ok"))
+      out$rt[out$rt>pars[,"TIMEOUT"]] <- NA
+      out$rt[as.numeric(out$R)==pars[,"Rnogo"]] <- NA
+      out
+    }
+
+# And of course a different likelihood
+        log_likelihood=function(pars,dadm,model,min_ll=log(1e-10)){
+      log_likelihood_ddmgng(pars=pars, dadm = dadm, model = model, min_ll = min_ll)
+    }
+
+EMC2:::log_likelihood_ddmgng
+
+# When we have an rt it is the standard DDM
+        isna <- is.na(dadm$rt)
+        ok <- attr(pars, "ok") & !isna
+        like[ok] <- model$dfun(dadm$rt[ok], dadm$R[ok], pars[ok, , drop = FALSE])
+        
+# When rt is NA you get 1 - probability of response before timeout 
+# (so either a slow response that would have been made on the go boundary or 
+# termination on the nogo boundary).
+
+        ok <- attr(pars, "ok") & isna
+        like[ok] <- pmax(0, pmin(1, (1 - model$pfun(dadm$TIMEOUT[ok], 
+            dadm$Rgo[ok], pars[ok, , drop = FALSE]))))
+
+# Here is the underlying DDM cdf
+EMC2:::pDDM
+
+# Which calls the WeinR package
+library(WeinR)
+WienR:::pWDM
+        
+# Running the model 
+  
+dGNG <- design(factors=list(subjects=1:1,S=1:2),Rlevels=1:2,
+    functions=list(
+      TIMEOUT=function(d)rep(2,nrow(d)),
+      Rnogo=function(d)factor(rep(1,nrow(d)),levels=c(1:2)), # no go response level
+      Rgo=function(d)factor(rep(2,nrow(d)),levels=c(1:2))),  # go response level
+    contrasts=list(S=cbind(d=c(-1,1))),
+    formula=list(v~S,a~1, Z~1, t0~1),
+    model=DDMGNG)
+
+# Lets look at some simulated data
+p <- sampled_pars(dGNG)
+p[] <- c(0,1,log(1),qnorm(.5),log(.4))  # ~70% accuracy
+
+# We see non-responses and reponses
+make_data(p,dGNG,10)
+
+# If we slow it down (a=4) we get more timeouts 
+p[] <- c(0,1,log(4),qnorm(.5),log(.4))  # ~70% accuracy
+make_data(p,dGNG,10)
+
+# Now lets compare fitting speed
+gng <- make_data(p,dGNG,100)
+emc <- make_emc(gng,dGNG,type="single")
+system.time(tmp <- init_chains(emc))
+
+
+dDDM <- design(factors=list(subjects=1:1,S=1:2),Rlevels=1:2,
+    contrasts=list(S=cbind(d=c(-1,1))),
+    formula=list(v~S,a~1, Z~1, t0~1),
+    model=DDM)
+
+ddmd <- make_data(p,dDDM,100)
+emc1 <- make_emc(ddmd,dDDM,type="single")
+
+system.time(tmp <- init_chains(emc1)) # ~8x
+
+# As an exercise compare fitting time.
+emc <- fit(emc) 
+# Time difference of 58.08074 secs
+
+emc <- fit(emc1)  # ~8x
+# Time difference of 6.796554 secs
 
